@@ -1,0 +1,49 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: my-web-deployment-multi-pod
+  labels:
+    app : my-k8s-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      project: mild
+  template:
+    metadata:
+      labels:
+        project: mild
+    spec:
+      containers:
+        - name : my-web
+          image: ergsey/phpk8s:v2
+          ports:
+            - containerPort: 80
+
+        - name : not-my-web
+          image: tomcat:8.5.38
+          ports:
+            - containerPort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-multi-pods-service
+  labels:
+     env  : prod
+     owner: SergoMadchina
+spec:
+  type: LoadBalancer
+  selector:
+    project: mild
+  ports:
+    - name      : my-web-app-listener
+      protocol  : TCP
+      port      : 80
+      targetPort: 80
+
+    - name      : not-my-web-app-listener
+      protocol  : TCP
+      port      : 8888
+      targetPort: 8080
